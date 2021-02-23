@@ -1,5 +1,7 @@
 package imgeditor;
 
+import com.nugumanov.wavelettransform.ImageTransformation;
+import com.nugumanov.wavelettransform.transforms.WaveletType;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -167,24 +169,23 @@ public class ImageEditor extends Application {
             public void handle(ActionEvent event) {
 
                 CompressWindow compress = new CompressWindow();
-                if (imageKeeper.getImage() != null) {
-                    try {
-                        compress.startWindow(primaryStage, imageKeeper.getBufImage());
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                } else {
+                if (imageKeeper.getImage() == null) {
                     imageKeeper.setBufImage(imageActions.openImage(primaryStage));
                     imageViewHelper.setImageView(imageKeeper.getImage());
                     root.setCenter(imageViewHelper.getImgView());
+                }
 
-                    try {
+                /*
+                try {
                         compress.startWindow(primaryStage, imageKeeper.getBufImage());
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-                }
-
+                 */
+                ImageTransformation imageTransformation = new ImageTransformation();
+                imageKeeper.setBufImage(imageTransformation.forwardImage(imageKeeper.getBufImage(), WaveletType.HAAR, 2));
+                imageViewHelper.setImageView(imageKeeper.getImage());
+                root.setCenter(imageViewHelper.getImgView());
                 imageKeeper.clear();
             } // handle
         }); // compressImageMenuItem
