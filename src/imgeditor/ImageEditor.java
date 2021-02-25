@@ -1,6 +1,7 @@
 package imgeditor;
 
 import com.nugumanov.wavelettransform.ImageTransformation;
+import com.nugumanov.wavelettransform.transforms.TransformType;
 import com.nugumanov.wavelettransform.transforms.WaveletType;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
@@ -20,12 +21,17 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
-import java.awt.*;
+import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
 public class ImageEditor extends Application {
+
+    boolean isTransformed = false;
+    ImageKeeper imageKeeper = new ImageKeeper();
+    ImageTransformation imageTransformation = new ImageTransformation();
+
     @Override
     public void start(Stage primaryStage) throws Exception {
 
@@ -39,7 +45,6 @@ public class ImageEditor extends Application {
         ToolBar toolBar = new ToolBar();
         toolBar.setStyle("-fx-background-color: #2b2b2b");
 
-        ImageKeeper imageKeeper = new ImageKeeper();
         ImageActions imageActions = new ImageActions();
         ImageViewHelper imageViewHelper = new ImageViewHelper();
         FileChooserHelper fileChooserHelper = new FileChooserHelper();
@@ -151,7 +156,6 @@ public class ImageEditor extends Application {
                 "  -fx-font-size: 12px;\n" +
                 "  -fx-padding: 5 5 5 5;");
 
-
         // MENU ITEMS ACTIONS
 
         openImageMenuItem.setOnAction(new EventHandler<ActionEvent>() {
@@ -176,53 +180,47 @@ public class ImageEditor extends Application {
                 }
 
                 /*
-                try {
+                    try {
                         compress.startWindow(primaryStage, imageKeeper.getBufImage());
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                  */
-                ImageTransformation imageTransformation = new ImageTransformation();
+
                 imageKeeper.setBufImage(imageTransformation.forwardImage(imageKeeper.getBufImage(), WaveletType.HAAR, 2));
+
+                isTransformed = true;
+
                 imageViewHelper.setImageView(imageKeeper.getImage());
                 root.setCenter(imageViewHelper.getImgView());
-                imageKeeper.clear();
+                //imageKeeper.clear();
             } // handle
         }); // compressImageMenuItem
-
-        zipDecompress.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-
-                if (imageKeeper.getBufImage() != null) {
-                    imageKeeper.clear();
-                    imageViewHelper.getImgView().setImage(null);
-                }
-
-                FileChooserHelper zipFileChooser = new FileChooserHelper(FileChooserHelper.Type.ZIP_COMPRESS);
-                File inputFile = zipFileChooser.getFileChooser().showOpenDialog(primaryStage);
-
-                BufferedImage bufferedImage = null;
-
-                imageKeeper.setBufImage(bufferedImage);
-                imageViewHelper.setImageView(imageKeeper.getImage());
-                root.setCenter(imageViewHelper.getImgView());
-            } // handle
-        }); // decompressImageMenuItem
 
         pngDecompress.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
 
-                if (imageKeeper.getBufImage() != null) {
-                    imageKeeper.clear();
-                    imageViewHelper.getImgView().setImage(null);
+                BufferedImage bufferedImage = null;
+
+                if (!isTransformed) {
+                    if (imageKeeper.getBufImage() != null) {
+                        imageKeeper.clear();
+                        imageViewHelper.getImgView().setImage(null);
+                    }
+                    FileChooserHelper zipFileChooser = new FileChooserHelper(FileChooserHelper.Type.PNG_COMPRESS);
+                    File inputFile = zipFileChooser.getFileChooser().showOpenDialog(primaryStage);
+
+                    try {
+                        bufferedImage = ImageIO.read(inputFile);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    bufferedImage = imageKeeper.getBufImage();
                 }
 
-                FileChooserHelper zipFileChooser = new FileChooserHelper(FileChooserHelper.Type.PNG_COMPRESS);
-                File inputFile = zipFileChooser.getFileChooser().showOpenDialog(primaryStage);
-
-                BufferedImage bufferedImage = null;
+                bufferedImage = imageTransformation.transform(bufferedImage, TransformType.REVERSE, WaveletType.HAAR, 2);
 
                 imageKeeper.setBufImage(bufferedImage);
                 imageViewHelper.setImageView(imageKeeper.getImage());
