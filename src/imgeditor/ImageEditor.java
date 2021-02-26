@@ -53,7 +53,6 @@ public class ImageEditor extends Application {
         Menu fileMenu = new Menu("Файл");
         Menu actionsMenu = new Menu("Действия");
         Menu helpMenu = new Menu("Помощь");
-        Menu decompressMenu = new Menu("Разжать");
 
         // Для "Файл"
         MenuItem openImageMenuItem = new MenuItem("Открыть");
@@ -61,9 +60,8 @@ public class ImageEditor extends Application {
         MenuItem exitMenuItem = new MenuItem("Выход");
 
         // Для "Действия"
-        MenuItem compressImageMenuItem = new MenuItem("Сжать");
-        MenuItem zipDecompress = new MenuItem("ZIP");
-        MenuItem pngDecompress = new MenuItem("PNG");
+        MenuItem encodeImageMenuItem = new MenuItem("Зашифровать");
+        MenuItem decodeImageMenuItem = new MenuItem("Расшифровать");
 
 
         exitMenuItem.setAccelerator(KeyCombination.keyCombination("Ctrl+X"));
@@ -168,7 +166,7 @@ public class ImageEditor extends Application {
             } // handle
         }); // openImageMenuItem
 
-        compressImageMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+        encodeImageMenuItem.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
 
@@ -195,9 +193,9 @@ public class ImageEditor extends Application {
                 root.setCenter(imageViewHelper.getImgView());
                 //imageKeeper.clear();
             } // handle
-        }); // compressImageMenuItem
+        }); // encodeImageMenuItem
 
-        pngDecompress.setOnAction(new EventHandler<ActionEvent>() {
+        decodeImageMenuItem.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
 
@@ -356,8 +354,7 @@ public class ImageEditor extends Application {
 
         // Добавление элементов на MenuBar
         fileMenu.getItems().addAll(openImageMenuItem, saveImageMenuItem, exitMenuItem);
-        actionsMenu.getItems().addAll(compressImageMenuItem, decompressMenu);
-        decompressMenu.getItems().addAll(zipDecompress, pngDecompress);
+        actionsMenu.getItems().addAll(encodeImageMenuItem, decodeImageMenuItem);
         menuBar.getMenus().addAll(fileMenu, actionsMenu, helpMenu);
         root.setTop(menuBar);
 
@@ -368,8 +365,7 @@ public class ImageEditor extends Application {
         toolBar.getItems().add(buttonCompressImage);
         toolBar.getItems().add(buttonSaveImage);
         toolBar.getItems().add(buttonClear);
-        pane.getChildren().add(buttonExit);
-        toolBar.getItems().add(pane);
+        toolBar.getItems().add(buttonExit);
         root.setLeft(toolBar);
 
 
