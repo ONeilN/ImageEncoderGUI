@@ -51,7 +51,7 @@ public class ImageEditor extends Application {
 
 
         Menu fileMenu = new Menu("Файл");
-        Menu actionsMenu = new Menu("Действия");
+        Menu actionsMenu = new Menu("Изображение");
         Menu helpMenu = new Menu("Помощь");
 
         // Для "Файл"
@@ -85,10 +85,27 @@ public class ImageEditor extends Application {
                 "    -fx-font-size: 12px;\n" +
                 "    -fx-padding: 5 5 5 5;");
 
-        File fileCompressImage = new File("./src/icons/buttons/compress.png");
-        Image iconCompressImageButton = new Image(fileCompressImage.toURI().toString());
-        Button buttonCompressImage = new Button("", new ImageView(iconCompressImageButton));
-        buttonCompressImage.setStyle(" -fx-background-color: \n" +
+        File fileEncodeImage = new File("./src/icons/buttons/encode.png");
+        Image iconEncodeImageButton = new Image(fileEncodeImage.toURI().toString());
+        Button buttonEncodeImage = new Button("", new ImageView(iconEncodeImageButton));
+        buttonEncodeImage.setStyle(" -fx-background-color: \n" +
+                " #090a0c,\n" +
+                " linear-gradient(#38424b 0%, #1f2429 20%, #191d22 100%),\n" +
+                " linear-gradient(#20262b, #191d22),\n" +
+                " radial-gradient(center 50% 0%, radius 100%, rgba(114,131,148,0.9), rgba(255,255,255,0));\n" +
+                " -fx-background-radius: 5,4,3,5;\n" +
+                " -fx-background-insets: 0,1,2,0;\n" +
+                " -fx-text-fill: white;\n" +
+                " -fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 5, 0.0 , 0 , 1 );\n" +
+                " -fx-font-family: \"Arial\";\n" +
+                "  -fx-text-fill: linear-gradient(white, #d0d0d0);\n" +
+                "  -fx-font-size: 12px;\n" +
+                "  -fx-padding: 5 5 5 5;");
+
+        File fileDecodeImage = new File("./src/icons/buttons/decode.png");
+        Image iconDecodeImageButton = new Image(fileDecodeImage.toURI().toString());
+        Button buttonDecodeImage = new Button("", new ImageView(iconDecodeImageButton));
+        buttonDecodeImage.setStyle(" -fx-background-color: \n" +
                 " #090a0c,\n" +
                 " linear-gradient(#38424b 0%, #1f2429 20%, #191d22 100%),\n" +
                 " linear-gradient(#20262b, #191d22),\n" +
@@ -224,7 +241,7 @@ public class ImageEditor extends Application {
                 imageViewHelper.setImageView(imageKeeper.getImage());
                 root.setCenter(imageViewHelper.getImgView());
             } // handle
-        }); // decompressImageMenuItem
+        }); // decodeImageMenuItem
 
         saveImageMenuItem.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -278,31 +295,65 @@ public class ImageEditor extends Application {
             } // handle
         }); // buttonOpenImage
 
-        buttonCompressImage.setOnAction(new EventHandler<ActionEvent>() {
+        buttonEncodeImage.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
 
                 CompressWindow compress = new CompressWindow();
-                if (imageKeeper.getImage() != null) {
-                    try {
-                        compress.startWindow(primaryStage, imageKeeper.getBufImage());
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                } else {
+                if (imageKeeper.getImage() == null) {
                     imageKeeper.setBufImage(imageActions.openImage(primaryStage));
                     imageViewHelper.setImageView(imageKeeper.getImage());
                     root.setCenter(imageViewHelper.getImgView());
+                }
 
+                /*
                     try {
                         compress.startWindow(primaryStage, imageKeeper.getBufImage());
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-                }
-                imageKeeper.clear();
+                 */
+
+                imageKeeper.setBufImage(imageTransformation.forwardImage(imageKeeper.getBufImage(), WaveletType.HAAR, 2));
+
+                isTransformed = true;
+
+                imageViewHelper.setImageView(imageKeeper.getImage());
+                root.setCenter(imageViewHelper.getImgView());
+                //imageKeeper.clear();
             } // handle
-        }); // buttonCompressImage
+        }); // buttonEncodeImage
+
+        buttonDecodeImage.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+
+                BufferedImage bufferedImage = null;
+
+                if (!isTransformed) {
+                    if (imageKeeper.getBufImage() != null) {
+                        imageKeeper.clear();
+                        imageViewHelper.getImgView().setImage(null);
+                    }
+                    FileChooserHelper zipFileChooser = new FileChooserHelper(FileChooserHelper.Type.PNG_COMPRESS);
+                    File inputFile = zipFileChooser.getFileChooser().showOpenDialog(primaryStage);
+
+                    try {
+                        bufferedImage = ImageIO.read(inputFile);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    bufferedImage = imageKeeper.getBufImage();
+                }
+
+                bufferedImage = imageTransformation.transform(bufferedImage, TransformType.REVERSE, WaveletType.HAAR, 2);
+
+                imageKeeper.setBufImage(bufferedImage);
+                imageViewHelper.setImageView(imageKeeper.getImage());
+                root.setCenter(imageViewHelper.getImgView());
+            } // handle
+        }); // buttonDecodeImage
 
         buttonSaveImage.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -362,7 +413,8 @@ public class ImageEditor extends Application {
         // Добавление кнопок на ToolBar
         toolBar.setOrientation(Orientation.VERTICAL);
         toolBar.getItems().add(buttonOpenImage);
-        toolBar.getItems().add(buttonCompressImage);
+        toolBar.getItems().add(buttonEncodeImage);
+        toolBar.getItems().add(buttonDecodeImage);
         toolBar.getItems().add(buttonSaveImage);
         toolBar.getItems().add(buttonClear);
         toolBar.getItems().add(buttonExit);
