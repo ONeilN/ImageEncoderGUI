@@ -1,6 +1,8 @@
 package imgeditor;
 
+import com.nugumanov.wavelettransform.ImageEncryption;
 import com.nugumanov.wavelettransform.ImageTransformation;
+import com.nugumanov.wavelettransform.encryptors.EncryptionType;
 import com.nugumanov.wavelettransform.transforms.TransformType;
 import com.nugumanov.wavelettransform.transforms.WaveletType;
 import javafx.application.Application;
@@ -22,8 +24,10 @@ import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 
 public class ImageEditor extends Application {
@@ -63,6 +67,8 @@ public class ImageEditor extends Application {
         MenuItem encodeImageMenuItem = new MenuItem("Зашифровать");
         MenuItem decodeImageMenuItem = new MenuItem("Расшифровать");
 
+        // Для "Помощь"
+        MenuItem documentationMenuItem = new MenuItem("Документация");
 
         exitMenuItem.setAccelerator(KeyCombination.keyCombination("Ctrl+X"));
         saveImageMenuItem.setAccelerator(KeyCombination.keyCombination("Ctrl+S"));
@@ -202,12 +208,24 @@ public class ImageEditor extends Application {
                     }
                  */
 
-                imageKeeper.setBufImage(imageTransformation.forwardImage(imageKeeper.getBufImage(), WaveletType.HAAR, 2));
+                //imageKeeper.setBufImage(imageTransformation.forwardImage(imageKeeper.getBufImage(), WaveletType.HAAR, 2));
 
                 isTransformed = true;
 
-                imageViewHelper.setImageView(imageKeeper.getImage());
-                root.setCenter(imageViewHelper.getImgView());
+                ImageEncryption encryption = new ImageEncryption();
+
+                byte[] enctypted = encryption.encrypt(imageKeeper.getBufImage(), EncryptionType.AES, WaveletType.HAAR);
+
+                File selectImage = fileChooserHelper.getFileChooser().showSaveDialog(primaryStage);
+                try {
+                    FileOutputStream fos = new FileOutputStream(selectImage);
+                    fos.write(enctypted);
+                    fos.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+//                imageViewHelper.setImageView(imageKeeper.getImage());
+//                root.setCenter(imageViewHelper.getImgView());
                 //imageKeeper.clear();
             } // handle
         }); // encodeImageMenuItem
@@ -280,6 +298,19 @@ public class ImageEditor extends Application {
                 }
             } // handle
         }); // exitMenuItem
+
+        documentationMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                try {
+                    if (Desktop.isDesktopSupported()) {
+                        Desktop.getDesktop().open(new File("./Documentation.docx"));
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } // try catch
+            } // handle
+        }); // documentationMenuItem
 
         /**
          *   BUTTONS ACTIONS
@@ -406,6 +437,7 @@ public class ImageEditor extends Application {
         // Добавление элементов на MenuBar
         fileMenu.getItems().addAll(openImageMenuItem, saveImageMenuItem, exitMenuItem);
         actionsMenu.getItems().addAll(encodeImageMenuItem, decodeImageMenuItem);
+        helpMenu.getItems().add(documentationMenuItem);
         menuBar.getMenus().addAll(fileMenu, actionsMenu, helpMenu);
         root.setTop(menuBar);
 
