@@ -54,7 +54,7 @@ public class ImageEditor extends Application {
 
 
         Menu fileMenu = new Menu("Файл");
-        Menu actionsMenu = new Menu("Изображение");
+        Menu actionsMenu = new Menu("Шифрование");
         Menu helpMenu = new Menu("Помощь");
 
         // Для "Файл"
@@ -65,6 +65,9 @@ public class ImageEditor extends Application {
         // Для "Действия"
         MenuItem encodeImageMenuItem = new MenuItem("Зашифровать");
         MenuItem decodeImageMenuItem = new MenuItem("Расшифровать");
+        MenuItem saveKeyMenuItem = new MenuItem("Сохранить ключ");
+        MenuItem loadKeyMenuItem = new MenuItem("Загрузить ключ");
+        MenuItem setKeyMenuItem = new MenuItem("Ввести ключ");
 
         // Для "Помощь"
         MenuItem documentationMenuItem = new MenuItem("Документация");
@@ -192,40 +195,15 @@ public class ImageEditor extends Application {
             @Override
             public void handle(ActionEvent event) {
 
-                CompressWindow compress = new CompressWindow();
                 if (imageKeeper.getImage() == null) {
                     imageKeeper.setBufImage(imageActions.openImage(primaryStage));
                     imageViewHelper.setImageView(imageKeeper.getImage());
                     root.setCenter(imageViewHelper.getImgView());
                 }
 
-                /*
-                    try {
-                        compress.startWindow(primaryStage, imageKeeper.getBufImage());
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                 */
-
-                //imageKeeper.setBufImage(imageTransformation.forwardImage(imageKeeper.getBufImage(), WaveletType.HAAR, 2));
-
                 isTransformed = true;
 
-                ImageEncryption encryption = new ImageEncryption();
-
-                byte[] enctypted = encryption.encrypt(imageKeeper.getBufImage(), EncryptionType.AES, WaveletType.HAAR);
-
-                File selectImage = fileChooserHelper.getFileChooser().showSaveDialog(primaryStage);
-                try {
-                    FileOutputStream fos = new FileOutputStream(selectImage);
-                    fos.write(enctypted);
-                    fos.close();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-//                imageViewHelper.setImageView(imageKeeper.getImage());
-//                root.setCenter(imageViewHelper.getImgView());
-                //imageKeeper.clear();
+                imageActions.encryptImage(imageKeeper, primaryStage);
             } // handle
         }); // encodeImageMenuItem
 
@@ -238,6 +216,20 @@ public class ImageEditor extends Application {
                 imageKeeper.setBufImage(dencryptedImage);
                 imageViewHelper.setImageView(imageKeeper.getImage());
                 root.setCenter(imageViewHelper.getImgView());
+            } // handle
+        }); // decodeImageMenuItem
+
+        saveKeyMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                imageActions.saveKeyToFile(primaryStage);
+            } // handle
+        }); // decodeImageMenuItem
+
+        loadKeyMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                imageActions.getKeyFromFile(primaryStage, EncryptionType.AES);
             } // handle
         }); // decodeImageMenuItem
 
@@ -416,7 +408,7 @@ public class ImageEditor extends Application {
 
         // Добавление элементов на MenuBar
         fileMenu.getItems().addAll(openImageMenuItem, saveImageMenuItem, exitMenuItem);
-        actionsMenu.getItems().addAll(encodeImageMenuItem, decodeImageMenuItem);
+        actionsMenu.getItems().addAll(encodeImageMenuItem, decodeImageMenuItem, saveKeyMenuItem, loadKeyMenuItem, setKeyMenuItem);
         helpMenu.getItems().add(documentationMenuItem);
         menuBar.getMenus().addAll(fileMenu, actionsMenu, helpMenu);
         root.setTop(menuBar);
