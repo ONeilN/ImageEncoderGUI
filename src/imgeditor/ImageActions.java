@@ -1,5 +1,9 @@
 package imgeditor;
 
+import com.nugumanov.wavelettransform.Encryption;
+import com.nugumanov.wavelettransform.ImageEncryption;
+import com.nugumanov.wavelettransform.encryptors.EncryptionType;
+import com.nugumanov.wavelettransform.transforms.WaveletType;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
 import javafx.stage.FileChooser;
@@ -9,8 +13,15 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 
 import java.io.*;
+import java.util.Date;
 
 public class ImageActions {
+
+    Encryption encryption = new ImageEncryption();
+    InputStream is = null;
+    File selectImage = null;
+    byte[] encryptedImage = null;
+    Date date = null;
 
     /**
      * Метод для загрузки изображения из памяти компьютера
@@ -30,6 +41,17 @@ public class ImageActions {
         return bufImage;
     } // openImage
 
+    File openEncryptedImage(Stage stage) {
+
+        byte[] encryptedImage = null;
+        FileChooserHelper fileChooserHelper = new FileChooserHelper();
+        FileChooser fileChooser = fileChooserHelper.getFileChooser();
+        selectImage = fileChooser.showOpenDialog(stage);
+
+
+        return selectImage;
+    }
+
     /**
      * Метод для сохранения изображения в память компьютера
      * @param image - объект класса Image
@@ -41,4 +63,42 @@ public class ImageActions {
 
         ImageIO.write(SwingFXUtils.fromFXImage(image, null), format, outputFile);
     } // save
+
+    BufferedImage decryptImage(ImageKeeper imageKeeper, ImageViewHelper imageViewHelper, Stage stage) {
+
+        BufferedImage dencryptedImage = null;
+
+        if (imageKeeper.getBufImage() != null) {
+            imageKeeper.clear();
+            imageViewHelper.getImgView().setImage(null);
+        }
+
+        selectImage = this.openEncryptedImage(stage);
+
+        try {
+            is = new FileInputStream(selectImage);
+        } catch (FileNotFoundException e2) {
+            // TODO Auto-generated catch block
+            e2.printStackTrace();
+        }
+        try {
+            encryptedImage = new byte[is.available()];
+        } catch (IOException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+        try {
+            is.read(encryptedImage);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        dencryptedImage = encryption.decrypt(encryptedImage, EncryptionType.AES, WaveletType.HAAR);
+
+        date = new Date();
+        System.out.println(date.toString() + " | Изображение расшифровано!");
+
+        return dencryptedImage;
+    }
 } // class

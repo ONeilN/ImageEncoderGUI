@@ -1,5 +1,6 @@
 package imgeditor;
 
+import com.nugumanov.wavelettransform.Encryption;
 import com.nugumanov.wavelettransform.ImageEncryption;
 import com.nugumanov.wavelettransform.ImageTransformation;
 import com.nugumanov.wavelettransform.encryptors.EncryptionType;
@@ -26,9 +27,7 @@ import javafx.stage.Stage;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 
 public class ImageEditor extends Application {
 
@@ -234,28 +233,9 @@ public class ImageEditor extends Application {
             @Override
             public void handle(ActionEvent event) {
 
-                BufferedImage bufferedImage = null;
+                BufferedImage dencryptedImage = imageActions.decryptImage(imageKeeper, imageViewHelper, primaryStage);
 
-                if (!isTransformed) {
-                    if (imageKeeper.getBufImage() != null) {
-                        imageKeeper.clear();
-                        imageViewHelper.getImgView().setImage(null);
-                    }
-                    FileChooserHelper zipFileChooser = new FileChooserHelper(FileChooserHelper.Type.PNG_COMPRESS);
-                    File inputFile = zipFileChooser.getFileChooser().showOpenDialog(primaryStage);
-
-                    try {
-                        bufferedImage = ImageIO.read(inputFile);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    bufferedImage = imageKeeper.getBufImage();
-                }
-
-                bufferedImage = imageTransformation.transform(bufferedImage, TransformType.REVERSE, WaveletType.HAAR, 2);
-
-                imageKeeper.setBufImage(bufferedImage);
+                imageKeeper.setBufImage(dencryptedImage);
                 imageViewHelper.setImageView(imageKeeper.getImage());
                 root.setCenter(imageViewHelper.getImgView());
             } // handle
