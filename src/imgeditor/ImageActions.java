@@ -45,6 +45,11 @@ public class ImageActions {
         return bufImage;
     } // openImage
 
+    /**
+     *
+     * @param stage
+     * @return
+     */
     File openEncryptedImage(Stage stage) {
 
         byte[] encryptedImage = null;
@@ -67,6 +72,11 @@ public class ImageActions {
         ImageIO.write(SwingFXUtils.fromFXImage(image, null), format, outputFile);
     } // save
 
+    /**
+     *
+     * @param imageKeeper
+     * @param stage
+     */
     void encryptImage(ImageKeeper imageKeeper, Stage stage) {
 
         byte[] enctypted = encryption.encrypt(imageKeeper.getBufImage(), EncryptionType.AES, WaveletType.HAAR);
@@ -85,6 +95,13 @@ public class ImageActions {
         System.out.println(date.toString() + " | Изображение зашифровано!");
     }
 
+    /**
+     *
+     * @param imageKeeper
+     * @param imageViewHelper
+     * @param stage
+     * @return
+     */
     BufferedImage decryptImage(ImageKeeper imageKeeper, ImageViewHelper imageViewHelper, Stage stage) {
 
         BufferedImage decryptedImage = null;
@@ -120,6 +137,10 @@ public class ImageActions {
         return decryptedImage;
     }
 
+    /**
+     *
+     * @param stage
+     */
     void saveKeyToFile(Stage stage) {
         keyFile = fileChooserHelper.getFileChooser().showSaveDialog(stage);
         byte[] key = keyHelper.getByteKey();
@@ -134,6 +155,11 @@ public class ImageActions {
         System.out.println(date.toString() + " | Ключ сохранен!");
     }
 
+    /**
+     *
+     * @param stage
+     * @param type
+     */
     void getKeyFromFile(Stage stage, EncryptionType type) {
 
         FileChooser fileChooser = fileChooserHelper.getFileChooser();

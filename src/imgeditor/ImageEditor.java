@@ -233,6 +233,18 @@ public class ImageEditor extends Application {
             } // handle
         }); // decodeImageMenuItem
 
+        setKeyMenuItem.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                EnterPasswordWindow enterPasswordWindow = new EnterPasswordWindow();
+                try {
+                    enterPasswordWindow.start(primaryStage);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } // handle
+        }); // decodeImageMenuItem
+
         saveImageMenuItem.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -302,28 +314,15 @@ public class ImageEditor extends Application {
             @Override
             public void handle(ActionEvent event) {
 
-                CompressWindow compress = new CompressWindow();
                 if (imageKeeper.getImage() == null) {
                     imageKeeper.setBufImage(imageActions.openImage(primaryStage));
                     imageViewHelper.setImageView(imageKeeper.getImage());
                     root.setCenter(imageViewHelper.getImgView());
                 }
 
-                /*
-                    try {
-                        compress.startWindow(primaryStage, imageKeeper.getBufImage());
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                 */
-
-                imageKeeper.setBufImage(imageTransformation.forwardImage(imageKeeper.getBufImage(), WaveletType.HAAR, 2));
-
                 isTransformed = true;
 
-                imageViewHelper.setImageView(imageKeeper.getImage());
-                root.setCenter(imageViewHelper.getImgView());
-                //imageKeeper.clear();
+                imageActions.encryptImage(imageKeeper, primaryStage);
             } // handle
         }); // buttonEncodeImage
 
@@ -331,28 +330,9 @@ public class ImageEditor extends Application {
             @Override
             public void handle(ActionEvent event) {
 
-                BufferedImage bufferedImage = null;
+                BufferedImage dencryptedImage = imageActions.decryptImage(imageKeeper, imageViewHelper, primaryStage);
 
-                if (!isTransformed) {
-                    if (imageKeeper.getBufImage() != null) {
-                        imageKeeper.clear();
-                        imageViewHelper.getImgView().setImage(null);
-                    }
-                    FileChooserHelper zipFileChooser = new FileChooserHelper(FileChooserHelper.Type.PNG_COMPRESS);
-                    File inputFile = zipFileChooser.getFileChooser().showOpenDialog(primaryStage);
-
-                    try {
-                        bufferedImage = ImageIO.read(inputFile);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    bufferedImage = imageKeeper.getBufImage();
-                }
-
-                bufferedImage = imageTransformation.transform(bufferedImage, TransformType.REVERSE, WaveletType.HAAR, 2);
-
-                imageKeeper.setBufImage(bufferedImage);
+                imageKeeper.setBufImage(dencryptedImage);
                 imageViewHelper.setImageView(imageKeeper.getImage());
                 root.setCenter(imageViewHelper.getImgView());
             } // handle
