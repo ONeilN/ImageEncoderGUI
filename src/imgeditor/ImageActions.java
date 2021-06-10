@@ -83,13 +83,15 @@ public class ImageActions {
 
         selectImage = fileChooserHelper.getFileChooser().showSaveDialog(stage);
 
-        try {
-            FileOutputStream fos = new FileOutputStream(selectImage);
-            fos.write(enctypted);
-            fos.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//        try {
+//            FileOutputStream fos = new FileOutputStream(selectImage);
+//            fos.write(enctypted);
+//            fos.close();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+
+        encryption.saveEncryptedImageToFile(enctypted, selectImage);
 
         date = new Date();
         System.out.println(date.toString() + " | Изображение зашифровано!");
@@ -113,21 +115,23 @@ public class ImageActions {
 
         selectImage = this.openEncryptedImage(stage);
 
-        try {
-            is = new FileInputStream(selectImage);
-        } catch (FileNotFoundException e2) {
-            e2.printStackTrace();
-        }
-        try {
-            encryptedImage = new byte[is.available()];
-        } catch (IOException e1) {
-            e1.printStackTrace();
-        }
-        try {
-            is.read(encryptedImage);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            is = new FileInputStream(selectImage);
+//        } catch (FileNotFoundException e2) {
+//            e2.printStackTrace();
+//        }
+//        try {
+//            encryptedImage = new byte[is.available()];
+//        } catch (IOException e1) {
+//            e1.printStackTrace();
+//        }
+//        try {
+//            is.read(encryptedImage);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+
+        encryptedImage = encryption.loadEncryptedImageFromFile(selectImage);
 
         decryptedImage = encryption.decrypt(encryptedImage, EncryptionType.AES, WaveletType.HAAR);
 
@@ -143,14 +147,16 @@ public class ImageActions {
      */
     void saveKeyToFile(Stage stage) {
         keyFile = fileChooserHelper.getFileChooser().showSaveDialog(stage);
-        byte[] key = keyHelper.getByteKey();
-        try {
-            FileOutputStream fos = new FileOutputStream(keyFile);
-            fos.write(key);
-            fos.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//        byte[] key = keyHelper.getByteKey();
+//        try {
+//            FileOutputStream fos = new FileOutputStream(keyFile);
+//            fos.write(key);
+//            fos.close();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+
+        keyHelper.saveKeyToFile(keyFile);
         date = new Date();
         System.out.println(date.toString() + " | Ключ сохранен!");
     }
@@ -165,27 +171,29 @@ public class ImageActions {
         FileChooser fileChooser = fileChooserHelper.getFileChooser();
         keyFile = fileChooser.showOpenDialog(stage);
 
-        byte[] key = null;
+//        byte[] key = null;
+//
+//        try {
+//            is = new FileInputStream(keyFile);
+//        } catch (FileNotFoundException e2) {
+//            e2.printStackTrace();
+//        }
+//
+//        try {
+//            key = new byte[is.available()];
+//        } catch (IOException e1) {
+//            e1.printStackTrace();
+//        }
+//
+//        try {
+//            is.read(key);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//
+//        keyHelper.setKey(key, type);
 
-        try {
-            is = new FileInputStream(keyFile);
-        } catch (FileNotFoundException e2) {
-            e2.printStackTrace();
-        }
-
-        try {
-            key = new byte[is.available()];
-        } catch (IOException e1) {
-            e1.printStackTrace();
-        }
-
-        try {
-            is.read(key);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        keyHelper.setKey(key, type);
+        keyHelper.getKeyFromFile(keyFile, type);
         date = new Date();
         System.out.println(date.toString() + " | Ключ загружен!");
     }
